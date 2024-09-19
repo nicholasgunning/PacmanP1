@@ -11,8 +11,6 @@ import pacman.view.background.BackgroundDrawer;
 import pacman.view.background.StandardBackgroundDrawer;
 import pacman.view.entity.EntityView;
 import pacman.view.entity.EntityViewImpl;
-import pacman.view.keyboard.KeyboardInputHandler;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,9 +34,6 @@ public class GameWindow {
         scene = new Scene(pane, width, height);
 
         entityViews = new ArrayList<>();
-
-        KeyboardInputHandler keyboardInputHandler = new KeyboardInputHandler();
-        scene.setOnKeyPressed(keyboardInputHandler::handlePressed);
 
         BackgroundDrawer backgroundDrawer = new StandardBackgroundDrawer();
         backgroundDrawer.draw(model, pane);

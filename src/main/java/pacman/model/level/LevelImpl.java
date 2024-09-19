@@ -2,6 +2,7 @@ package pacman.model.level;
 
 import org.json.simple.JSONObject;
 import pacman.ConfigurationParseException;
+import pacman.model.commandPattern.*;
 import pacman.model.entity.factory.Renderable;
 import pacman.model.entity.dynamic.DynamicEntity;
 import pacman.model.entity.dynamic.ghost.Ghost;
@@ -34,6 +35,8 @@ public class LevelImpl implements Level {
     private int numLives;
     private List<Renderable> collectables;
     private GhostMode currentGhostMode;
+    private CommandInvoker commandInvoker;
+
 
     public LevelImpl(JSONObject levelConfiguration,
                      Maze maze) {
@@ -42,8 +45,16 @@ public class LevelImpl implements Level {
         this.tickCount = 0;
         this.modeLengths = new HashMap<>();
         this.currentGhostMode = GhostMode.SCATTER;
-
         initLevel(new LevelConfigurationReader(levelConfiguration));
+        initCommands();
+    }
+
+    private void initCommands() {
+        this.commandInvoker = new CommandInvoker();
+        this.commandInvoker.addCommand("UP", new MoveUpCommand(player));
+        this.commandInvoker.addCommand("DOWN", new MoveDownCommand(player));
+        this.commandInvoker.addCommand("LEFT", new MoveLeftCommand(player));
+        this.commandInvoker.addCommand("RIGHT", new MoveRightCommand(player));
     }
 
     private void initLevel(LevelConfigurationReader levelConfigurationReader) {
@@ -153,22 +164,22 @@ public class LevelImpl implements Level {
 
     @Override
     public void moveLeft() {
-        player.left();
+        commandInvoker.executeCommand("LEFT");
     }
 
     @Override
     public void moveRight() {
-        player.right();
+        commandInvoker.executeCommand("RIGHT");
     }
 
     @Override
     public void moveUp() {
-        player.up();
+        commandInvoker.executeCommand("UP");
     }
 
     @Override
     public void moveDown() {
-        player.down();
+        commandInvoker.executeCommand("DOWN");
     }
 
     @Override
