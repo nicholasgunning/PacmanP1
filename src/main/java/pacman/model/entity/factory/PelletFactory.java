@@ -20,7 +20,6 @@ public class PelletFactory implements EntityFactory {
             Vector2D position = new Vector2D(x, y); // Note: x and y are already multiplied by RESIZING_FACTOR in MazeCreator
             BoundingBox boundingBox = new BoundingBoxImpl(position, RESIZING_FACTOR/1.25, RESIZING_FACTOR/1.25);
             Pellet pellet = new Pellet(boundingBox, Renderable.Layer.FOREGROUND, pelletImage, PELLET_POINTS);
-            System.out.println("Pellet added at (" + x / RESIZING_FACTOR + ", " + y / RESIZING_FACTOR + ")");
             return pellet;
         } catch (Exception e) {
             System.out.println("Error creating pellet: " + e.getMessage());

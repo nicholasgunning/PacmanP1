@@ -18,7 +18,6 @@ public class PacmanFactory implements EntityFactory {
     @Override
     public Renderable createEntity(char type, int x, int y) {
         try {
-            System.out.println("PACMAN found at (" + x / RESIZING_FACTOR + ", " + y / RESIZING_FACTOR + ")");
 
             // Load Pacman images
             Map<PacmanVisual, Image> pacmanImages = loadPacmanImages();

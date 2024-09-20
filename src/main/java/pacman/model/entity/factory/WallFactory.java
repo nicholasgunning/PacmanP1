@@ -25,8 +25,6 @@ public class WallFactory implements EntityFactory {
             BoundingBox boundingBox = new BoundingBoxImpl(position, RESIZING_FACTOR, RESIZING_FACTOR);
             StaticEntity wall = new StaticEntityImpl(boundingBox, Renderable.Layer.BACKGROUND, wallImage);
 
-            System.out.println("Wall added at (" + x / RESIZING_FACTOR + ", " + y / RESIZING_FACTOR + ")");
-
             return wall;
         } catch (FileNotFoundException e) {
             System.out.println("Error loading wall image: " + e.getMessage());

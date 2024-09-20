@@ -38,7 +38,6 @@ public class GhostFactory implements EntityFactory {
             Ghost ghost = new GhostImpl(ghostImage, boundingBox, ghostKinematicState,
                     GhostMode.SCATTER, targetCorner, Direction.RIGHT);
 
-            System.out.println("Ghost added at (" + x / RESIZING_FACTOR + ", " + y / RESIZING_FACTOR + ") with target corner " + targetCorner);
 
             return ghost;
         } catch (FileNotFoundException e) {
