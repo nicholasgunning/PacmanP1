@@ -4,7 +4,7 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
-import javafx.scene.text.Text;
+import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 import pacman.model.engine.GameEngine;
 import pacman.model.entity.factory.Renderable;
@@ -12,10 +12,8 @@ import pacman.view.background.BackgroundDrawer;
 import pacman.view.background.StandardBackgroundDrawer;
 import pacman.view.entity.EntityView;
 import pacman.view.entity.EntityViewImpl;
-import pacman.view.observer.Observer;
 import pacman.view.observer.GameBoardRenderable;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,13 +28,11 @@ public class GameWindow {
     private final GameEngine model;
     private final List<EntityView> entityViews;
 
-
     public GameWindow(GameEngine model, int width, int height) {
-        this.model = model;
 
+        this.model = model;
         pane = new Pane();
         scene = new Scene(pane, width, height);
-
         entityViews = new ArrayList<>();
 
         BackgroundDrawer backgroundDrawer = new StandardBackgroundDrawer();

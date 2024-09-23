@@ -6,8 +6,8 @@ import java.util.List;
 public class GameState implements Subject {
 
     private List<Observer> observers = new ArrayList<>();
-    private static int totalScore = 0;
-    private static int totalLives = 0;
+    private static int totalScore;
+    private static int totalLives = 3;
     private static boolean gameOver;
     private static boolean gameWon;
 
@@ -30,7 +30,6 @@ public class GameState implements Subject {
     }
 
 
-
     public static int getTotalScore() {
         return totalScore;
     }
@@ -42,12 +41,15 @@ public class GameState implements Subject {
         }
     }
 
-    public static int getTotalLives() {
-        return totalLives;
+    public void setTotalLives(int totalLives) {
+        if (totalLives != GameState.totalLives) {
+            GameState.totalLives = totalLives;
+            notifyObservers();
+        }
     }
 
-    public static void setTotalLives(int totalLives) {
-        GameState.totalLives = totalLives;
+    public static int getTotalLives() {
+        return totalLives;
     }
 
 }

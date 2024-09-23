@@ -18,7 +18,7 @@ public class ScoreDisplay extends GameBoardRenderable implements Observer {
         javafx.scene.text.Font font = null;
         try {
             File fontFile = new File("src/main/resources/maze/PressStart2P-Regular.ttf");
-            font = javafx.scene.text.Font.loadFont(new FileInputStream(fontFile), 10);
+            font = javafx.scene.text.Font.loadFont(new FileInputStream(fontFile), 20);
         } catch (FileNotFoundException e) {
             System.out.println("Font file not found");
         }
@@ -37,7 +37,6 @@ public class ScoreDisplay extends GameBoardRenderable implements Observer {
 
     @Override
     public void update(GameState gameState) {
-        System.out.println("ScoreDisplay update");
         int newScore = gameState.getTotalScore();
         if (newScore != displayedScore) {
             displayedScore = newScore;
@@ -51,7 +50,7 @@ public class ScoreDisplay extends GameBoardRenderable implements Observer {
     public void render() {
         boardPane.getChildren().removeIf(node -> node instanceof Text);
         Text scoreText = new Text(10, 30, "Score: " + displayedScore);
-        scoreText.setFont(javafx.scene.text.Font.font("Press Start 2P", 10));
+        scoreText.setFont(javafx.scene.text.Font.font("Press Start 2P", 20));
         scoreText.setFill(javafx.scene.paint.Color.WHITE);
         boardPane.getChildren().add(scoreText);
     }

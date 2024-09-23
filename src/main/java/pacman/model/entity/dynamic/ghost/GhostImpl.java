@@ -25,8 +25,10 @@ public class GhostImpl implements Ghost {
     private Set<Direction> possibleDirections;
     private Vector2D playerPosition;
     private Map<GhostMode, Double> speeds;
+    private final Vector2D intialTarget;
+    private boolean isInGhostHouse;
 
-    public GhostImpl(Image image, BoundingBox boundingBox, KinematicState kinematicState, GhostMode ghostMode, Vector2D targetCorner, Direction currentDirection) {
+    public GhostImpl(Image image, BoundingBox boundingBox, KinematicState kinematicState, GhostMode ghostMode, Vector2D targetCorner, Direction currentDirection, Vector2D intialTarget) {
         this.image = image;
         this.boundingBox = boundingBox;
         this.kinematicState = kinematicState;
@@ -36,6 +38,13 @@ public class GhostImpl implements Ghost {
         this.possibleDirections = new HashSet<>();
         this.targetCorner = targetCorner;
         this.targetLocation = getTargetLocation();
+        this.intialTarget = intialTarget;
+        this.isInGhostHouse = true;
+    }
+
+    @Override
+    public void updatePlayerPosition(Vector2D playerPosition) {
+        this.playerPosition = playerPosition;
     }
 
     @Override
@@ -50,6 +59,13 @@ public class GhostImpl implements Ghost {
 
     @Override
     public void update() {
+        if (isInGhostHouse) {
+            Vector2D currentPosition = this.getCenter();
+            if (Vector2D.calculateEuclideanDistance(currentPosition, intialTarget) < 50) {
+                isInGhostHouse = false;
+            }
+        }
+
         this.updateDirection();
         this.kinematicState.update();
         this.boundingBox.setTopLeft(this.kinematicState.getPosition());
@@ -73,16 +89,23 @@ public class GhostImpl implements Ghost {
     }
 
     private Vector2D getTargetLocation() {
+        if (isInGhostHouse) {
+            return intialTarget;
+        }
 
         return switch (this.ghostMode) {
             // how does Ghost get the Player's position ??
-
-            case CHASE -> this.targetCorner; //NEEDS TO BE UPDATED TO PACMAN POSITION
+            case CHASE -> this.playerPosition != null ? this.playerPosition : this.targetCorner;
             case SCATTER -> this.targetCorner;
         };
     }
 
     private Direction selectDirection(Set<Direction> possibleDirections) {
+
+        if (isInGhostHouse && possibleDirections.contains(Direction.UP)) {
+            return Direction.UP;
+        }
+
         if (possibleDirections.isEmpty()) {
             return currentDirection;
         }
@@ -106,7 +129,6 @@ public class GhostImpl implements Ghost {
                 }
             }
         }
-
         if (distances.isEmpty()) {
             System.err.println("Warning: No valid directions found");
             return currentDirection;
@@ -175,6 +197,20 @@ public class GhostImpl implements Ghost {
         this.kinematicState = new KinematicStateImpl.KinematicStateBuilder()
                 .setPosition(startingPosition)
                 .build();
+    }
+
+    @Override
+    public void resetAfterDeath() {
+        this.kinematicState = new KinematicStateImpl.KinematicStateBuilder()
+                .setPosition(startingPosition)
+                .setSpeed(speeds.get(GhostMode.SCATTER)) // Set initial speed
+                .setDirection(Direction.UP) // Set initial direction
+                .build();
+        this.isInGhostHouse = true;
+        this.currentDirection = Direction.UP; // or whatever the initial direction should be
+        this.ghostMode = GhostMode.CHASE; // Reset to initial mode
+        this.targetLocation = getTargetLocation(); // Recalculate target location
+        this.possibleDirections.clear(); // Clear possible directions
     }
 
     @Override

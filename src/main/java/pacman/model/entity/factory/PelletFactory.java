@@ -12,7 +12,7 @@ import java.io.FileInputStream;
 public class PelletFactory implements EntityFactory {
 
     private static final int RESIZING_FACTOR = 16; // Make sure this matches your MazeCreator.RESIZING_FACTOR
-    private static final int PELLET_POINTS = 10; // configurable
+    private static final int PELLET_POINTS = 100; // configurable
     @Override
     public Renderable createEntity(char type, int x, int y) {
         try {

@@ -12,7 +12,13 @@ import java.io.FileNotFoundException;
 
 public class GhostFactory implements EntityFactory {
 
-    private static final int RESIZING_FACTOR = 16; // Make sure this matches your MazeCreator.RESIZING_FACTOR
+    private static final int RESIZING_FACTOR = 16;
+    private static final Vector2D[] CORNERS = {
+            new Vector2D(0, 0),  // top-left corner
+            new Vector2D(0, 576),  // bottom-left corner
+            new Vector2D(448, 0),  // top-right corner
+            new Vector2D(448, 576)  // bottom-right corner
+    };
 
     @Override
     public Renderable createEntity(char type, int x, int y) {
@@ -32,11 +38,14 @@ public class GhostFactory implements EntityFactory {
                     .build();
 
             // Set up ghost target corner
-            Vector2D targetCorner = new Vector2D(0, 0);  // top-left corner
+
+            // Randomly select a corner for the ghost to target
+            Vector2D targetCorner = CORNERS[(int) (Math.random() * CORNERS.length)];
+            Vector2D intialTarget = new Vector2D(100, 100);
 
             // Create ghost
             Ghost ghost = new GhostImpl(ghostImage, boundingBox, ghostKinematicState,
-                    GhostMode.SCATTER, targetCorner, Direction.RIGHT);
+                    GhostMode.CHASE, targetCorner, Direction.UP, intialTarget);
 
 
             return ghost;

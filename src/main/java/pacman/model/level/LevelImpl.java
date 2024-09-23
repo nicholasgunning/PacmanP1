@@ -3,6 +3,7 @@ package pacman.model.level;
 import org.json.simple.JSONObject;
 import pacman.ConfigurationParseException;
 import pacman.model.commandPattern.*;
+import pacman.model.entity.dynamic.physics.Vector2D;
 import pacman.model.entity.factory.Renderable;
 import pacman.model.entity.dynamic.DynamicEntity;
 import pacman.model.entity.dynamic.ghost.Ghost;
@@ -13,6 +14,9 @@ import pacman.model.entity.dynamic.player.Pacman;
 import pacman.model.entity.staticentity.StaticEntity;
 import pacman.model.entity.staticentity.collectable.Collectable;
 import pacman.model.maze.Maze;
+import pacman.view.observer.GameState;
+import pacman.view.observer.LivesDisplay;
+import pacman.view.observer.ScoreDisplay;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,7 +40,11 @@ public class LevelImpl implements Level {
     private List<Renderable> collectables;
     private GhostMode currentGhostMode;
     private CommandInvoker commandInvoker;
-
+    private int secondsCount;
+    private GameState gameState;
+    private ScoreDisplay scoreDisplay;
+    private LivesDisplay livesDisplay;
+    private final int points;
 
     public LevelImpl(JSONObject levelConfiguration,
                      Maze maze) {
@@ -47,6 +55,10 @@ public class LevelImpl implements Level {
         this.currentGhostMode = GhostMode.SCATTER;
         initLevel(new LevelConfigurationReader(levelConfiguration));
         initCommands();
+        points = 100;
+        gameState = new GameState();
+        scoreDisplay = new ScoreDisplay(gameState);
+        livesDisplay = new LivesDisplay(gameState);
     }
 
     private void initCommands() {
@@ -103,14 +115,25 @@ public class LevelImpl implements Level {
 
     @Override
     public void tick() {
-        if (tickCount == modeLengths.get(currentGhostMode)) {
+        Vector2D pacmanPosition = this.player.getCenter();
+        for (Ghost ghost : this.ghosts) {
+            ghost.updatePlayerPosition(pacmanPosition);
+        }
 
+        //calculate seconds
+        if (tickCount % 60 == 0) {
+            secondsCount++;
+            System.out.println("Seconds: " + secondsCount);
+        }
+
+        if (secondsCount == modeLengths.get(currentGhostMode)) {
             // update ghost mode
+            System.out.println("Switching ghost mode");
             this.currentGhostMode = GhostMode.getNextGhostMode(currentGhostMode);
             for (Ghost ghost : this.ghosts) {
                 ghost.setGhostMode(this.currentGhostMode);
             }
-
+            secondsCount = 0;
             tickCount = 0;
         }
 
@@ -148,7 +171,6 @@ public class LevelImpl implements Level {
                 }
             }
         }
-
         tickCount++;
     }
 
@@ -198,6 +220,15 @@ public class LevelImpl implements Level {
 
     @Override
     public void handleLoseLife() {
+
+        int newLives = gameState.getTotalLives() - 1;
+        gameState.setTotalLives(newLives);
+
+        for (Ghost ghost : this.ghosts) {
+            ghost.resetAfterDeath();
+        }
+        this.player.reset();
+
     }
 
     @Override
@@ -207,6 +238,7 @@ public class LevelImpl implements Level {
 
     @Override
     public void collect(Collectable collectable) {
-
+        int newScore = gameState.getTotalScore() + points;
+        gameState.setTotalScore(newScore);
     }
 }
