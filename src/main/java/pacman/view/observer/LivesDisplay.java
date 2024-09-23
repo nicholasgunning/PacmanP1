@@ -23,9 +23,7 @@ public class LivesDisplay extends GameBoardRenderable implements Observer {
         lifeImages = new ArrayList<>();
         try {
             Image lifeImage = new Image(new FileInputStream("src/main/resources/maze/pacman/playerRight.png"));
-            for (int i = 0; i < displayedLives; i++) {
-                lifeImages.add(lifeImage);
-            }
+            lifeImages.add(lifeImage);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
@@ -50,12 +48,11 @@ public class LivesDisplay extends GameBoardRenderable implements Observer {
     @Override
     public void render() {
         boardPane.getChildren().removeIf(node -> node instanceof ImageView);
-
-            for (int i = 0; i < displayedLives; i++) {
-                ImageView imageView = new ImageView(lifeImages.get(i));
-                imageView.setX(10 + i * 30);
-                imageView.setY(540);
-                boardPane.getChildren().add(imageView);
-            }
+        for (int i = 0; i < displayedLives; i++) {
+            ImageView imageView = new ImageView(lifeImages.get(0));
+            imageView.setX(10 + i * 30);
+            imageView.setY(540);
+            boardPane.getChildren().add(imageView);
+        }
     }
 }

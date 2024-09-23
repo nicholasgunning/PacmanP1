@@ -14,16 +14,6 @@ public class ScoreDisplay extends GameBoardRenderable implements Observer {
     private Pane boardPane;
 
 
-    static {
-        javafx.scene.text.Font font = null;
-        try {
-            File fontFile = new File("src/main/resources/maze/PressStart2P-Regular.ttf");
-            font = javafx.scene.text.Font.loadFont(new FileInputStream(fontFile), 20);
-        } catch (FileNotFoundException e) {
-            System.out.println("Font file not found");
-        }
-    }
-
     public ScoreDisplay(GameState gameState) {
         super(10, 10);
         gameState.addObserver(this);

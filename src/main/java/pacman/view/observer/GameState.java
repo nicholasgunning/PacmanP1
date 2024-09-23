@@ -10,6 +10,7 @@ public class GameState implements Subject {
     private static int totalLives = 3;
     private static boolean gameOver;
     private static boolean gameWon;
+    private static boolean GameReady;
 
 
     @Override
@@ -29,7 +30,6 @@ public class GameState implements Subject {
         }
     }
 
-
     public static int getTotalScore() {
         return totalScore;
     }
@@ -41,6 +41,10 @@ public class GameState implements Subject {
         }
     }
 
+    public static int getTotalLives() {
+        return totalLives;
+    }
+
     public void setTotalLives(int totalLives) {
         if (totalLives != GameState.totalLives) {
             GameState.totalLives = totalLives;
@@ -48,8 +52,28 @@ public class GameState implements Subject {
         }
     }
 
-    public static int getTotalLives() {
-        return totalLives;
+    public static boolean isGameOver() {
+        return gameOver;
     }
+
+    public static boolean isGameReady() {
+        return GameReady;
+    }
+
+    public void setGameOver(boolean gameOver) {
+        if (gameOver != GameState.gameOver) {
+            GameState.gameOver = gameOver;
+            notifyObservers();
+        }
+    }
+
+    public void setGameReady(boolean gameReady) {
+        if (gameReady != GameState.GameReady) {
+            GameState.GameReady = gameReady;
+            notifyObservers();
+        }
+    }
+
+
 
 }
