@@ -274,5 +274,13 @@ public class LevelImpl implements Level {
     public void collect(Collectable collectable) {
         int newScore = gameState.getTotalScore() + points;
         gameState.setTotalScore(newScore);
+        collectables.remove(collectable);
+        if (collectables.isEmpty()) {
+            nextLevel();
+        }
+    }
+
+    public void nextLevel() {
+        //HANDLE NEXT LEVEL
     }
 }
