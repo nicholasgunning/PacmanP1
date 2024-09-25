@@ -15,7 +15,6 @@ import pacman.model.entity.staticentity.collectable.Collectable;
 import pacman.model.maze.Maze;
 import pacman.view.observer.*;
 
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -25,9 +24,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-
 /**
- * Concrete implement of Pac-Man level
+ * Concrete implementation of Pac-Man level
  */
 public class LevelImpl implements Level {
 
@@ -50,17 +48,19 @@ public class LevelImpl implements Level {
     private GameOverDisplay gameOverDisplay;
     private GameWinDisplay gameWinDisplay;
 
-
     private final int points;
     private boolean freezeGame = false;
 
-
-    //For Level Change
+    // For Level Change
     private int currentLevelNo;
     private List<JSONObject> levelConfigurations;
     private LevelConfigurationReader currentLevelConfig;
 
-
+    /**
+     * Constructor for LevelImpl
+     * @param levelConfigurations List of JSON objects containing level configurations
+     * @param maze The maze object for the game
+     */
     public LevelImpl(List<JSONObject> levelConfigurations, Maze maze) {
         this.renderables = new ArrayList<>();
         this.maze = maze;
@@ -80,6 +80,9 @@ public class LevelImpl implements Level {
         gameWinDisplay = new GameWinDisplay(gameState);
     }
 
+    /**
+     * Static block to load custom font
+     */
     static {
         javafx.scene.text.Font font = null;
         try {
@@ -90,6 +93,9 @@ public class LevelImpl implements Level {
         }
     }
 
+    /**
+     * Initialize command pattern for player movement
+     */
     private void initCommands() {
         this.commandInvoker = new CommandInvoker();
         this.commandInvoker.addCommand("UP", new MoveUpCommand(player));
@@ -98,6 +104,10 @@ public class LevelImpl implements Level {
         this.commandInvoker.addCommand("RIGHT", new MoveRightCommand(player));
     }
 
+    /**
+     * Initialize level with configuration
+     * @param levelConfigurationReader Reader for the level configuration
+     */
     private void initLevel(LevelConfigurationReader levelConfigurationReader) {
         this.currentLevelConfig = levelConfigurationReader;
 
@@ -107,6 +117,7 @@ public class LevelImpl implements Level {
         this.player = (Controllable) maze.getControllable();
         this.player.setSpeed(levelConfigurationReader.getPlayerSpeed());
         setNumLives(maze.getNumLives());
+
         // Set up ghosts
         this.ghosts = maze.getGhosts().stream()
                 .map(element -> (Ghost) element)
@@ -119,8 +130,6 @@ public class LevelImpl implements Level {
             ghost.setGhostMode(this.currentGhostMode);
         }
         this.modeLengths = levelConfigurationReader.getGhostModeLengths();
-
-
     }
 
     @Override
@@ -128,11 +137,19 @@ public class LevelImpl implements Level {
         return this.renderables;
     }
 
+    /**
+     * Get all dynamic entities in the level
+     * @return List of DynamicEntity objects
+     */
     private List<DynamicEntity> getDynamicEntities() {
         return renderables.stream().filter(e -> e instanceof DynamicEntity).map(e -> (DynamicEntity) e).collect(
                 Collectors.toList());
     }
 
+    /**
+     * Get all static entities in the level
+     * @return List of StaticEntity objects
+     */
     private List<StaticEntity> getStaticEntities() {
         return renderables.stream().filter(e -> e instanceof StaticEntity).map(e -> (StaticEntity) e).collect(
                 Collectors.toList());
@@ -140,7 +157,6 @@ public class LevelImpl implements Level {
 
     @Override
     public void tick() {
-
         if (freezeGame) {
             return;
         }
@@ -158,14 +174,13 @@ public class LevelImpl implements Level {
             ghost.updatePlayerPosition(pacmanPosition);
         }
 
-        //calculate seconds
+        // Calculate seconds
         if (tickCount % 60 == 0) {
             secondsCount++;
         }
 
+        // Update ghost mode if necessary
         if (secondsCount == modeLengths.get(currentGhostMode)) {
-            // update ghost mode
-
             System.out.println("Switching ghost mode");
             this.currentGhostMode = GhostMode.getNextGhostMode(currentGhostMode);
             for (Ghost ghost : this.ghosts) {
@@ -174,11 +189,12 @@ public class LevelImpl implements Level {
             secondsCount = 0;
         }
 
+        // Switch Pacman image periodically
         if (tickCount % Pacman.PACMAN_IMAGE_SWAP_TICK_COUNT == 0) {
             this.player.switchImage();
         }
 
-        // Update the dynamic entities
+        // Update dynamic entities
         List<DynamicEntity> dynamicEntities = getDynamicEntities();
 
         for (DynamicEntity dynamicEntity : dynamicEntities) {
@@ -186,9 +202,10 @@ public class LevelImpl implements Level {
             dynamicEntity.update();
         }
 
+        // Handle collisions
         for (int i = 0; i < dynamicEntities.size(); ++i) {
             DynamicEntity dynamicEntityA = dynamicEntities.get(i);
-            // handle collisions between dynamic entities
+            // Handle collisions between dynamic entities
             for (int j = i + 1; j < dynamicEntities.size(); ++j) {
                 DynamicEntity dynamicEntityB = dynamicEntities.get(j);
 
@@ -199,7 +216,7 @@ public class LevelImpl implements Level {
                 }
             }
 
-            // handle collisions between dynamic entities and static entities
+            // Handle collisions between dynamic entities and static entities
             for (StaticEntity staticEntity : getStaticEntities()) {
                 if (dynamicEntityA.collidesWith(staticEntity)) {
                     dynamicEntityA.collideWith(this, staticEntity);
@@ -279,16 +296,17 @@ public class LevelImpl implements Level {
 
     @Override
     public void collect(Collectable collectable) {
-
         int newScore = gameState.getTotalScore() + points;
         gameState.setTotalScore(newScore);
         collectables.remove(collectable);
         if (collectables.isEmpty()) {
             nextLevel();
         }
-
     }
 
+    /**
+     * Handle transition to next level
+     */
     public void nextLevel() {
         System.out.println("Next level");
         currentLevelNo++;
@@ -309,7 +327,6 @@ public class LevelImpl implements Level {
             // Update mode lengths
             this.modeLengths = newLevelConfig.getGhostModeLengths();
 
-
             // Reset tick count and seconds count
             this.tickCount = 0;
             this.secondsCount = 0;
@@ -320,6 +337,7 @@ public class LevelImpl implements Level {
             // Update current level configuration
             this.currentLevelConfig = newLevelConfig;
 
+            // Repopulate collectables
             int count = 0;
             int totalPellets = maze.getPellets().size();
             for (Renderable renderable : maze.getPellets()) {

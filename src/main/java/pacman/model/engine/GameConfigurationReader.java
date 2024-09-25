@@ -16,6 +16,10 @@ public class GameConfigurationReader {
 
     private JSONObject gameConfig;
 
+    /**
+     * Constructor for GameConfigurationReader
+     * @param configPath path of the configuration file
+     */
     public GameConfigurationReader(String configPath){
         JSONParser parser = new JSONParser();
 

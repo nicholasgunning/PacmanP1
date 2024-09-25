@@ -11,19 +11,30 @@ import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Factory class for creating Pacman entities.
+ * Implements the EntityFactory interface.
+ */
 public class PacmanFactory implements EntityFactory {
 
-    private static final int RESIZING_FACTOR = 16; // Make sure this matches your MazeCreator.RESIZING_FACTOR
+    private static final int RESIZING_FACTOR = 16; // Should match MazeCreator.RESIZING_FACTOR
 
+    /**
+     * Creates and returns a Pacman entity.
+     *
+     * @param type The character representing the type of entity (unused in this factory)
+     * @param x The x-coordinate where Pacman should be placed
+     * @param y The y-coordinate where Pacman should be placed
+     * @return A Renderable object representing the created Pacman, or null if creation fails
+     */
     @Override
     public Renderable createEntity(char type, int x, int y) {
         try {
-
             // Load Pacman images
             Map<PacmanVisual, Image> pacmanImages = loadPacmanImages();
 
             // Set up Pacman position and bounding box
-            Vector2D position = new Vector2D(x, y); // Note: x and y are already multiplied by RESIZING_FACTOR in MazeCreator
+            Vector2D position = new Vector2D(x, y);
             BoundingBox boundingBox = new BoundingBoxImpl(position, RESIZING_FACTOR + 5, RESIZING_FACTOR + 5);
 
             // Set up Pacman kinematic state
@@ -33,7 +44,7 @@ public class PacmanFactory implements EntityFactory {
                     .setDirection(Direction.UP)
                     .build();
 
-            // Create Pacman
+            // Create Pacman (using Singleton pattern)
             Pacman pacman = Pacman.getInstance(pacmanImages.get(PacmanVisual.CLOSED), pacmanImages, boundingBox, pacmanKinematicState);
 
             return pacman;
@@ -45,6 +56,12 @@ public class PacmanFactory implements EntityFactory {
         return null; // Return null if Pacman creation fails
     }
 
+    /**
+     * Loads Pacman images for different visual states.
+     *
+     * @return A Map of PacmanVisual enum to corresponding Image objects
+     * @throws FileNotFoundException if any of the image files are not found
+     */
     private Map<PacmanVisual, Image> loadPacmanImages() throws FileNotFoundException {
         Map<PacmanVisual, Image> pacmanImages = new HashMap<>();
         pacmanImages.put(PacmanVisual.CLOSED, new Image(new FileInputStream("src/main/resources/maze/pacman/playerClosed.png")));

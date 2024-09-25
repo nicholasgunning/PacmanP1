@@ -8,6 +8,10 @@ import pacman.model.level.Level;
 
 import java.util.*;
 
+/**
+ * Represents the Pacman character in the game.
+ * This class implements the Singleton pattern to ensure only one Pacman instance exists.
+ */
 public class Pacman implements Controllable {
 
     public static final int PACMAN_IMAGE_SWAP_TICK_COUNT = 8;
@@ -21,12 +25,16 @@ public class Pacman implements Controllable {
     private boolean isClosedImage;
     private static Pacman single_instance = null;
 
+    /**
+     * Private constructor for Singleton pattern.
+     */
     private Pacman(
             Image currentImage,
             Map<PacmanVisual, Image> images,
             BoundingBox boundingBox,
             KinematicState kinematicState
     ){
+        // Initialize Pacman's properties
         this.currentImage = currentImage;
         this.images = images;
         this.boundingBox = boundingBox;
@@ -36,6 +44,9 @@ public class Pacman implements Controllable {
         this.isClosedImage = false;
     }
 
+    /**
+     * Returns the single instance of Pacman, creating it if it doesn't exist.
+     */
     public static Pacman getInstance(
             Image currentImage,
             Map<PacmanVisual, Image> images,
@@ -55,11 +66,7 @@ public class Pacman implements Controllable {
 
     @Override
     public Image getImage() {
-        if (isClosedImage){
-            return images.get(PacmanVisual.CLOSED);
-        } else {
-            return currentImage;
-        }
+        return isClosedImage ? images.get(PacmanVisual.CLOSED) : currentImage;
     }
 
     @Override
@@ -84,10 +91,8 @@ public class Pacman implements Controllable {
 
     @Override
     public void up() {
-
         this.kinematicState.up();
         this.currentImage = images.get(PacmanVisual.UP);
-
     }
 
     @Override
@@ -134,7 +139,7 @@ public class Pacman implements Controllable {
                 .setSpeed(kinematicState.getSpeed())
                 .build();
 
-        left();
+        left(); // Set initial direction to left
     }
 
     @Override
