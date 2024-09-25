@@ -34,7 +34,7 @@ public class PacmanFactory implements EntityFactory {
                     .build();
 
             // Create Pacman
-            Pacman pacman = new Pacman(pacmanImages.get(PacmanVisual.CLOSED), pacmanImages, boundingBox, pacmanKinematicState);
+            Pacman pacman = Pacman.getInstance(pacmanImages.get(PacmanVisual.CLOSED), pacmanImages, boundingBox, pacmanKinematicState);
 
             return pacman;
         } catch (FileNotFoundException e) {

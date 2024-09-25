@@ -11,6 +11,8 @@ public class GameState implements Subject {
     private static boolean gameOver;
     private static boolean gameWon;
     private static boolean GameReady;
+    private int currentLevel;
+
 
 
     @Override
@@ -60,6 +62,10 @@ public class GameState implements Subject {
         return GameReady;
     }
 
+    public static boolean isGameWon() {
+        return gameWon;
+    }
+
     public void setGameOver(boolean gameOver) {
         if (gameOver != GameState.gameOver) {
             GameState.gameOver = gameOver;
@@ -72,6 +78,22 @@ public class GameState implements Subject {
             GameState.GameReady = gameReady;
             notifyObservers();
         }
+    }
+
+    public void setGameWon(boolean gameWon) {
+        if (gameWon != GameState.gameWon) {
+            GameState.gameWon = gameWon;
+            notifyObservers();
+        }
+    }
+
+    public int getCurrentLevel() {
+        return currentLevel;
+    }
+
+    public void setCurrentLevel(int currentLevel) {
+        this.currentLevel = currentLevel;
+        notifyObservers();
     }
 
 

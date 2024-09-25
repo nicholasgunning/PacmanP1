@@ -1,8 +1,6 @@
 package pacman.model.level;
 
-import javafx.application.Platform;
 import org.json.simple.JSONObject;
-import pacman.ConfigurationParseException;
 import pacman.model.commandPattern.*;
 import pacman.model.entity.dynamic.physics.Vector2D;
 import pacman.model.entity.factory.Renderable;
@@ -15,11 +13,7 @@ import pacman.model.entity.dynamic.player.Pacman;
 import pacman.model.entity.staticentity.StaticEntity;
 import pacman.model.entity.staticentity.collectable.Collectable;
 import pacman.model.maze.Maze;
-import pacman.view.observer.GameState;
-import pacman.view.observer.LivesDisplay;
-import pacman.view.observer.ScoreDisplay;
-import pacman.view.observer.GameReadyDisplay;
-import pacman.view.observer.GameOverDisplay;
+import pacman.view.observer.*;
 
 
 import java.io.File;
@@ -30,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 
 /**
  * Concrete implement of Pac-Man level
@@ -53,17 +48,28 @@ public class LevelImpl implements Level {
     private LivesDisplay livesDisplay;
     private GameReadyDisplay gameReadyDisplay;
     private GameOverDisplay gameOverDisplay;
+    private GameWinDisplay gameWinDisplay;
+
+
     private final int points;
     private boolean freezeGame = false;
 
-    public LevelImpl(JSONObject levelConfiguration,
-                     Maze maze) {
+
+    //For Level Change
+    private int currentLevelNo;
+    private List<JSONObject> levelConfigurations;
+    private LevelConfigurationReader currentLevelConfig;
+
+
+    public LevelImpl(List<JSONObject> levelConfigurations, Maze maze) {
         this.renderables = new ArrayList<>();
         this.maze = maze;
         this.tickCount = 0;
         this.modeLengths = new HashMap<>();
         this.currentGhostMode = GhostMode.SCATTER;
-        initLevel(new LevelConfigurationReader(levelConfiguration));
+        this.levelConfigurations = levelConfigurations;
+        this.currentLevelNo = 0;
+        initLevel(new LevelConfigurationReader(levelConfigurations.get(currentLevelNo)));
         initCommands();
         points = 100;
         gameState = new GameState();
@@ -71,6 +77,7 @@ public class LevelImpl implements Level {
         livesDisplay = new LivesDisplay(gameState);
         gameReadyDisplay = new GameReadyDisplay(gameState);
         gameOverDisplay = new GameOverDisplay(gameState);
+        gameWinDisplay = new GameWinDisplay(gameState);
     }
 
     static {
@@ -92,12 +99,11 @@ public class LevelImpl implements Level {
     }
 
     private void initLevel(LevelConfigurationReader levelConfigurationReader) {
+        this.currentLevelConfig = levelConfigurationReader;
+
         // Fetch all renderables for the level
         this.renderables = maze.getRenderables();
-        // Set up player
-        if (!(maze.getControllable() instanceof Controllable)) {
-            throw new ConfigurationParseException("Player entity is not controllable");
-        }
+        this.collectables = new ArrayList<>(maze.getPellets());
         this.player = (Controllable) maze.getControllable();
         this.player.setSpeed(levelConfigurationReader.getPlayerSpeed());
         setNumLives(maze.getNumLives());
@@ -105,6 +111,7 @@ public class LevelImpl implements Level {
         this.ghosts = maze.getGhosts().stream()
                 .map(element -> (Ghost) element)
                 .collect(Collectors.toList());
+
         Map<GhostMode, Double> ghostSpeeds = levelConfigurationReader.getGhostSpeeds();
 
         for (Ghost ghost : this.ghosts) {
@@ -112,8 +119,8 @@ public class LevelImpl implements Level {
             ghost.setGhostMode(this.currentGhostMode);
         }
         this.modeLengths = levelConfigurationReader.getGhostModeLengths();
-        // Set up collectables
-        this.collectables = new ArrayList<>(maze.getPellets());
+
+
     }
 
     @Override
@@ -154,11 +161,11 @@ public class LevelImpl implements Level {
         //calculate seconds
         if (tickCount % 60 == 0) {
             secondsCount++;
-            System.out.println("Seconds: " + secondsCount);
         }
 
         if (secondsCount == modeLengths.get(currentGhostMode)) {
             // update ghost mode
+
             System.out.println("Switching ghost mode");
             this.currentGhostMode = GhostMode.getNextGhostMode(currentGhostMode);
             for (Ghost ghost : this.ghosts) {
@@ -272,15 +279,66 @@ public class LevelImpl implements Level {
 
     @Override
     public void collect(Collectable collectable) {
+
         int newScore = gameState.getTotalScore() + points;
         gameState.setTotalScore(newScore);
         collectables.remove(collectable);
         if (collectables.isEmpty()) {
             nextLevel();
         }
+
     }
 
     public void nextLevel() {
-        //HANDLE NEXT LEVEL
+        System.out.println("Next level");
+        currentLevelNo++;
+        if (currentLevelNo < levelConfigurations.size()) {
+            maze.reset();
+            // Update level configuration
+            LevelConfigurationReader newLevelConfig = new LevelConfigurationReader(levelConfigurations.get(currentLevelNo));
+            // Update player speed
+            player.setSpeed(newLevelConfig.getPlayerSpeed());
+            // Update ghost speeds and modes
+            Map<GhostMode, Double> ghostSpeeds = newLevelConfig.getGhostSpeeds();
+
+            for (Ghost ghost : this.ghosts) {
+                ghost.setSpeeds(ghostSpeeds);
+                ghost.setGhostMode(GhostMode.SCATTER);  // Reset to initial mode
+            }
+
+            // Update mode lengths
+            this.modeLengths = newLevelConfig.getGhostModeLengths();
+
+
+            // Reset tick count and seconds count
+            this.tickCount = 0;
+            this.secondsCount = 0;
+
+            // Reset current ghost mode
+            this.currentGhostMode = GhostMode.SCATTER;
+
+            // Update current level configuration
+            this.currentLevelConfig = newLevelConfig;
+
+            int count = 0;
+            int totalPellets = maze.getPellets().size();
+            for (Renderable renderable : maze.getPellets()) {
+                if (count == totalPellets - 3) {
+                    break;
+                }
+                this.collectables.add(renderable);
+                count++;
+            }
+
+            // Notify the game state about the new level
+            gameState.setCurrentLevel(currentLevelNo + 1);
+
+            // Set game ready state to show "Get Ready!" message
+            gameState.setGameReady(true);
+
+        } else {
+            gameState.setGameWon(true);
+            freezeGame = true;
+        }
     }
 }

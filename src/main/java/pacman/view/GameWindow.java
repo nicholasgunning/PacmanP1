@@ -82,7 +82,6 @@ public class GameWindow {
                 pane.getChildren().add(entityView.getNode());
             }
         }
-
         for (EntityView entityView : entityViews) {
             if (entityView.isMarkedForDelete()) {
                 pane.getChildren().remove(entityView.getNode());

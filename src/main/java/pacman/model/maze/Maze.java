@@ -142,8 +142,11 @@ public class Maze {
      * Resets all renderables to starting state
      */
     public void reset(){
+        MazeCreator mazeCreator = new MazeCreator("src/main/resources/maze.txt");
         for (Renderable renderable : renderables){
             renderable.reset();
         }
     }
+
+
 }

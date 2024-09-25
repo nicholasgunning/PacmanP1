@@ -19,8 +19,9 @@ public class Pacman implements Controllable {
     private Image currentImage;
     private Set<Direction> possibleDirections;
     private boolean isClosedImage;
+    private static Pacman single_instance = null;
 
-    public Pacman(
+    private Pacman(
             Image currentImage,
             Map<PacmanVisual, Image> images,
             BoundingBox boundingBox,
@@ -33,6 +34,18 @@ public class Pacman implements Controllable {
         this.startingPosition = kinematicState.getPosition();
         this.possibleDirections = new HashSet<>();
         this.isClosedImage = false;
+    }
+
+    public static Pacman getInstance(
+            Image currentImage,
+            Map<PacmanVisual, Image> images,
+            BoundingBox boundingBox,
+            KinematicState kinematicState
+    ){
+        if (single_instance == null){
+            single_instance = new Pacman(currentImage, images, boundingBox, kinematicState);
+        }
+        return single_instance;
     }
 
     @Override
@@ -71,8 +84,10 @@ public class Pacman implements Controllable {
 
     @Override
     public void up() {
+
         this.kinematicState.up();
         this.currentImage = images.get(PacmanVisual.UP);
+
     }
 
     @Override
@@ -119,7 +134,6 @@ public class Pacman implements Controllable {
                 .setSpeed(kinematicState.getSpeed())
                 .build();
 
-        // go left by default
         left();
     }
 

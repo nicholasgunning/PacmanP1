@@ -7,6 +7,8 @@ import pacman.model.level.Level;
 import pacman.model.level.LevelImpl;
 import pacman.model.maze.Maze;
 import pacman.model.maze.MazeCreator;
+import java.util.ArrayList;
+
 
 import java.util.List;
 
@@ -19,12 +21,16 @@ public class GameEngineImpl implements GameEngine {
     private int numLevels;
     private final int currentLevelNo;
     private Maze maze;
-    private JSONArray levelConfigs;
+    private List<JSONObject> levelConfigs;
 
-    public GameEngineImpl(String configPath) {
+
+    private GameEngineImpl(String configPath) {
         this.currentLevelNo = 0;
-
         init(new GameConfigurationReader(configPath));
+    }
+
+    public static GameEngineImpl getInstance(String configPath){
+        return new GameEngineImpl(configPath);
     }
 
     private void init(GameConfigurationReader gameConfigurationReader) {
@@ -35,7 +41,11 @@ public class GameEngineImpl implements GameEngine {
         this.maze.setNumLives(gameConfigurationReader.getNumLives());
 
         // Get level configurations
-        this.levelConfigs = gameConfigurationReader.getLevelConfigs();
+        JSONArray levelConfigArray = gameConfigurationReader.getLevelConfigs();
+        this.levelConfigs = new ArrayList<>();
+        for (Object obj : levelConfigArray) {
+            this.levelConfigs.add((JSONObject) obj);
+        }
         this.numLevels = levelConfigs.size();
         if (levelConfigs.isEmpty()) {
             System.exit(0);
@@ -73,10 +83,8 @@ public class GameEngineImpl implements GameEngine {
     }
 
     private void startLevel() {
-        JSONObject levelConfig = (JSONObject) levelConfigs.get(currentLevelNo);
-        // reset renderables to starting state
         maze.reset();
-        this.currentLevel = new LevelImpl(levelConfig, maze);
+        this.currentLevel = new LevelImpl(levelConfigs, maze);
     }
 
     @Override

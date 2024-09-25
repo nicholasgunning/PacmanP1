@@ -21,8 +21,6 @@ public class MazeCreator {
     public static final int RESIZING_FACTOR = 16;
     private final EntityFactoryRegistry entityFactoryRegistry;
 
-
-
     private KinematicStateImpl.KinematicStateBuilder pacmanKinematicStateBuilder = new KinematicStateImpl.KinematicStateBuilder();
 
     private KinematicStateImpl.KinematicStateBuilder ghostKinematicStateBuilder = new KinematicStateImpl.KinematicStateBuilder();
@@ -33,9 +31,6 @@ public class MazeCreator {
     }
 
     public Maze createMaze() {
-        /**
-         * TO DO: Implement Factory Method Pattern
-         */
         File f = new File(this.fileName);
         Maze maze = new Maze();
 
