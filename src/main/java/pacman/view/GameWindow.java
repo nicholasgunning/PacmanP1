@@ -22,29 +22,41 @@ import java.util.List;
  */
 public class GameWindow {
 
-
     private final Scene scene;
     private final Pane pane;
     private final GameEngine model;
     private final List<EntityView> entityViews;
 
+    /**
+     * Constructor for GameWindow
+     * @param model The game engine
+     * @param width The width of the game window
+     * @param height The height of the game window
+     */
     public GameWindow(GameEngine model, int width, int height) {
-
         this.model = model;
         pane = new Pane();
         scene = new Scene(pane, width, height);
         entityViews = new ArrayList<>();
 
+        // Draw the background
         BackgroundDrawer backgroundDrawer = new StandardBackgroundDrawer();
         backgroundDrawer.draw(model, pane);
-
     }
 
+    /**
+     * Get the JavaFX Scene
+     * @return The Scene object
+     */
     public Scene getScene() {
         return scene;
     }
 
+    /**
+     * Start the game loop
+     */
     public void run() {
+        // Set up a timeline to call the draw method every 34 milliseconds (approx. 30 fps)
         Timeline timeline = new Timeline(new KeyFrame(Duration.millis(34),
                 t -> this.draw()));
 
@@ -52,21 +64,27 @@ public class GameWindow {
         timeline.play();
         model.startGame();
 
+        // Set up renderables
         List<GameBoardRenderable> renderables = GameBoardRenderable.getAllRenderables();
         for (GameBoardRenderable renderable : renderables) {
             renderable.setPane(pane);
         }
     }
 
+    /**
+     * Update the game view
+     */
     private void draw() {
         model.tick();
 
         List<Renderable> entities = model.getRenderables();
 
+        // Mark all existing entity views for deletion
         for (EntityView entityView : entityViews) {
             entityView.markForDelete();
         }
 
+        // Update existing views and create new ones as needed
         for (Renderable entity : entities) {
             boolean notFound = true;
             for (EntityView view : entityViews) {
@@ -82,6 +100,8 @@ public class GameWindow {
                 pane.getChildren().add(entityView.getNode());
             }
         }
+
+        // Remove views that are no longer needed
         for (EntityView entityView : entityViews) {
             if (entityView.isMarkedForDelete()) {
                 pane.getChildren().remove(entityView.getNode());
