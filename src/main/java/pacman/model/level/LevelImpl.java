@@ -323,7 +323,7 @@ public class LevelImpl implements Level {
             int count = 0;
             int totalPellets = maze.getPellets().size();
             for (Renderable renderable : maze.getPellets()) {
-                if (count == totalPellets - 3) {
+                if (count == totalPellets - 10) {
                     break;
                 }
                 this.collectables.add(renderable);
