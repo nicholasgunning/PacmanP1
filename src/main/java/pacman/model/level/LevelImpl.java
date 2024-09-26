@@ -12,6 +12,7 @@ import pacman.model.entity.dynamic.player.Controllable;
 import pacman.model.entity.dynamic.player.Pacman;
 import pacman.model.entity.staticentity.StaticEntity;
 import pacman.model.entity.staticentity.collectable.Collectable;
+import pacman.model.entity.staticentity.collectable.Pellet;
 import pacman.model.maze.Maze;
 import pacman.view.observer.*;
 
@@ -56,10 +57,13 @@ public class LevelImpl implements Level {
     private List<JSONObject> levelConfigurations;
     private LevelConfigurationReader currentLevelConfig;
 
+
+    private int collectableCount = 1;
     /**
      * Constructor for LevelImpl
+     *
      * @param levelConfigurations List of JSON objects containing level configurations
-     * @param maze The maze object for the game
+     * @param maze                The maze object for the game
      */
     public LevelImpl(List<JSONObject> levelConfigurations, Maze maze) {
         this.renderables = new ArrayList<>();
@@ -106,6 +110,7 @@ public class LevelImpl implements Level {
 
     /**
      * Initialize level with configuration
+     *
      * @param levelConfigurationReader Reader for the level configuration
      */
     private void initLevel(LevelConfigurationReader levelConfigurationReader) {
@@ -139,6 +144,7 @@ public class LevelImpl implements Level {
 
     /**
      * Get all dynamic entities in the level
+     *
      * @return List of DynamicEntity objects
      */
     private List<DynamicEntity> getDynamicEntities() {
@@ -148,6 +154,7 @@ public class LevelImpl implements Level {
 
     /**
      * Get all static entities in the level
+     *
      * @return List of StaticEntity objects
      */
     private List<StaticEntity> getStaticEntities() {
@@ -296,10 +303,15 @@ public class LevelImpl implements Level {
 
     @Override
     public void collect(Collectable collectable) {
-        int newScore = gameState.getTotalScore() + points;
-        gameState.setTotalScore(newScore);
-        collectables.remove(collectable);
-        if (collectables.isEmpty()) {
+        collectableCount++;
+        if (collectable.isCollectable()) {
+            int newScore = gameState.getTotalScore() + collectable.getPoints();
+            gameState.setTotalScore(newScore);
+        }
+        System.out.println("Collectable count: " + collectableCount);
+        System.out.println("Total collectables: " + collectables.size());
+        if (collectableCount == collectables.size()) {
+            collectableCount = 1;
             nextLevel();
         }
     }
@@ -308,10 +320,15 @@ public class LevelImpl implements Level {
      * Handle transition to next level
      */
     public void nextLevel() {
-        System.out.println("Next level");
+
         currentLevelNo++;
         if (currentLevelNo < levelConfigurations.size()) {
             maze.reset();
+
+            System.out.println("Collectables after reset: " + collectables.size());
+            System.out.println("Total pellets in maze: " + maze.getPellets().size());
+
+
             // Update level configuration
             LevelConfigurationReader newLevelConfig = new LevelConfigurationReader(levelConfigurations.get(currentLevelNo));
             // Update player speed
@@ -338,14 +355,14 @@ public class LevelImpl implements Level {
             this.currentLevelConfig = newLevelConfig;
 
             // Repopulate collectables
-            int count = 0;
             int totalPellets = maze.getPellets().size();
-            for (Renderable renderable : maze.getPellets()) {
-                if (count == totalPellets - 10) {
-                    break;
-                }
-                this.collectables.add(renderable);
-                count++;
+
+
+
+            this.collectables.clear();
+            System.out.println(maze.getPellets().size());
+            for (Renderable pellet : maze.getPellets()) {
+                this.collectables.add(pellet);
             }
 
             // Notify the game state about the new level
@@ -353,8 +370,7 @@ public class LevelImpl implements Level {
 
             // Set game ready state to show "Get Ready!" message
             gameState.setGameReady(true);
-
-        } else {
+            } else {
             gameState.setGameWon(true);
             freezeGame = true;
         }

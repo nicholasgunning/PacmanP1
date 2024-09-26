@@ -3,6 +3,7 @@ package pacman.model.maze;
 import pacman.model.entity.dynamic.DynamicEntity;
 import pacman.model.entity.factory.Renderable;
 import pacman.model.entity.dynamic.physics.Direction;
+import pacman.model.entity.staticentity.collectable.Pellet;
 
 import java.util.*;
 
@@ -142,9 +143,15 @@ public class Maze {
      * Resets all renderables to starting state
      */
     public void reset(){
-        MazeCreator mazeCreator = new MazeCreator("src/main/resources/maze.txt");
-        for (Renderable renderable : renderables){
+        for (Renderable renderable : renderables) {
             renderable.reset();
+        }
+
+        // Specifically for pellets
+        for (Renderable pellet : pellets) {
+            if (pellet instanceof Pellet) {
+                ((Pellet) pellet).reset();
+            }
         }
     }
 
